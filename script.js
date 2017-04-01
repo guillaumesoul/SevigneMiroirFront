@@ -2,6 +2,19 @@ $(document).ready(function() {
 
     // TODO faire un setInterval pour aller mettre a jour l'affichage tous les X
 
+    // il faut que je check tous les x intervalle si je dois changer de presentation en fonction de la duree de chaque presentation
+
+    var original = {
+        'date': new Date()
+    };
+
+    var updated = setInterval(function() {
+        serieToDisplay;
+        console.log(serieToDisplay);
+        var html = generateHtmlIframe(serieToDisplay.affichages[0]);
+        $('#iframeDiv').html(html);
+    }, 10000);
+
 
 
 
@@ -44,10 +57,9 @@ $(document).ready(function() {
     console.log(HH);*/
 
     //je veux afficher des presentations
-    // il faut que je check tous les x intervalle si je dois changer de presentation en fonction de la duree de chaque presentation
     var now = new Date();
     var html = generateHtmlIframe(serieToDisplay.affichages[0]);
-    $('body').append(html);
+    //$('#iframeDiv').html(html);
 
 
 
