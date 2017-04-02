@@ -5,17 +5,16 @@ $(document).ready(function() {
     var firstlaunch = true;
 
     var serieDisplayed = getSerieToDisplay();
-    //console.log(serieToDisplay);
 
+    /*
+    * Interrogation du backend tous les 5 min pour voir si une nouvelle serie doit être affichée
+    * */
     var updated = setInterval(function() {
 
-        //je ne met a jour le html que si quelque chose a changer
         serieToDisplay = getSerieToDisplay();
         if(serieDisplayed.id != serieToDisplay.id) {
-            //console.log('on doit changer de serie');
             serieDisplayed = serieToDisplay;
         } else {
-            //console.log('meme serie');
             if(firstlaunch) {
                 console.log('init display');
                 firstlaunch = false;
@@ -23,42 +22,15 @@ $(document).ready(function() {
             }
         }
 
-        //je regarde le nombre d'affichages et leur dure
-
-        //var nbPresentations = serieToDisplay.affichages.length;
-        //console.log(nbPresentations);
-
-        //pour chaque presentation je fais un set interval sur la duree de la presentation
-
-
-        //console.log(serieToDisplay);
-        /*serieToDisplay.affichages.forEach(function(affichage) {
-            console.log(affichage);
-        });*/
-        /*var pres = setInterval(function() {
-
-        }, 3000);*/
-
-
-
-        //GENERATE DU CODE HTML
-        //var html = generateHtmlIframe(serieToDisplay.affichages[0]);
-        //$('#iframeDiv').html(html);
     }, 5000);
 
 
 
-
-
-
-
-
-    // TODO get screen size and send them in post
-
+    // TODO P1: gestion de aucune serie retourné par le backend ou serie ne contient aucune presentations
     //Permet de retrouver la serie active a l'heure de la requete
-    //var serieToDisplay = function ()
     function getSerieToDisplay()
     {
+        console.log('on y va');
         var serieActive = {};
         $.ajax({
             url: 'http://sevignemiroir.local/display/active',
@@ -69,16 +41,12 @@ $(document).ready(function() {
                 serieActive = response;
             },
             error: function (response) {
-                alert('Erreur lors de la récupération du diaporama');
+                // TODO P1 : gestion des erreurs de récupération
+                //alert('Erreur lors de la récupération du diaporama');
             }
         });
         return serieActive;
     }
-
-    //je veux afficher des presentations
-    /*var html = generateHtmlIframe(serieToDisplay.affichages[0]);
-    $('#iframeDiv').html(html);*/
-
 
 
     /*
@@ -88,8 +56,10 @@ $(document).ready(function() {
     * */
     function generateHtmlIframe(affichage)
     {
-        console.log(affichage);
+        // TODO P2:  get screen size
         var iframeHtmlCode = '';
+        var windowWidth = $(document).width();
+        var windowHeight = $(document).height();
 
         if(
             affichage.presentation._id_google_slide != undefined && affichage.presentation._id_google_slide != ''
@@ -102,9 +72,8 @@ $(document).ready(function() {
             var slider_loop = 'true';
             (affichage.presentation.slider_autostart == true) ?  slider_autostart = 'true' :  slider_autostart = 'false';
             (affichage.presentation.slider_loop == true) ?  slider_loop = 'true' :  slider_loop = 'false';
-            iframeHtmlCode = '<iframe src="https://docs.google.com/presentation/d/' + affichage.presentation._id_google_slide + '/embed?start=' + slider_autostart + '&loop=' + slider_loop + '&delayms=' + affichage.presentation.slide_duration.toString() + '" frameborder="0" width="1280px" height="670px" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>';
+            iframeHtmlCode = '<iframe src="https://docs.google.com/presentation/d/' + affichage.presentation._id_google_slide + '/embed?start=' + slider_autostart + '&loop=' + slider_loop + '&delayms=' + affichage.presentation.slide_duration.toString() + '" frameborder="0" width="' + windowWidth  + '" height="' + windowHeight + '" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>';
         } else {
-            console.log('il manque des infos');
         }
         //var iframeHtmlCode = '<iframe src="https://docs.google.com/presentation/d/1oOBuNHorJsZ1AAIWZ4TuqzmzHRWJ38Eh0lAmx5JzNkE/embed?start=true&loop=true&delayms=3000" frameborder="0" width="1280px" height="670px" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>';
         return iframeHtmlCode;
@@ -118,18 +87,12 @@ $(document).ready(function() {
     * */
     function displaySerie(serie)
     {
-        //j'ai une nnouvelle serie je veux l'afficher
-        //je vais regarder chacun de ses affichages
-
-        console.log(serie);
 
         var i = 0;
         playNextPresentation();
 
         function playNextPresentation()
         {
-            var now = new Date();
-            console.log(now);
             if (i < serie.affichages.length) {
                 var presentation = serie.affichages[i].presentation;
 
@@ -137,7 +100,7 @@ $(document).ready(function() {
                 var dateReference = new Date('1970-01-01T00:00:00+0100');
                 var diff = dateSerie - dateReference;
 
-                var intervalTimeOut = diff + 2;
+                var intervalTimeOut = diff + 2000;
 
                 var iframeHtmlCode = generateHtmlIframe(serie.affichages[i]);
                 $('#iframeDiv').html(iframeHtmlCode);
@@ -150,64 +113,7 @@ $(document).ready(function() {
             }
         }
 
-
-
-        /*var affichage = serie.affichages[0];
-        console.log(affichage.id);
-        var dateSerie = new Date(affichage.presentation.presentation_duration);
-        var dateReference = new Date('1970-01-01T00:00:00+0100');
-        var diff = dateSerie - dateReference;
-
-        var diffSeconds = diff/1000;
-        console.log(diff);
-
-        var timerID = setInterval(function() { // On crée notre compte à rebours
-            displayAffichage(affichage);
-            console.log("presentation termines");
-
-        }, diff);*/
-
-
-
-        /*for(var i=0 ; i<serie.affichages.length ; i++) {
-
-            console.log('display new affichage');
-            displayAffichage(serie.affichages[i]);
-
-            var affichage = serie.affichages[i];
-            console.log(affichage.id);
-            var dateSerie = new Date(affichage.presentation.presentation_duration);
-            var dateReference = new Date('1970-01-01T00:00:00+0100');
-            var diff = dateSerie - dateReference;
-
-            var diffSeconds = diff/1000;
-            console.log(diff);
-
-            var timerID = setTimeout(function() { // On crée notre compte à rebours
-                console.log("presentation termines");
-
-            }, diff);
-        }*/
-
     }
-
-    function displayAffichage(affichage)
-    {
-        console.log('display affichage');
-        var dateSerie = new Date(affichage.presentation.presentation_duration);
-        var dateReference = new Date('1970-01-01T00:00:00+0100');
-        var diff = dateSerie - dateReference;
-
-        var diffSeconds = diff/1000;
-        console.log(diff);
-
-        var timerID = setTimeout(function() { // On crée notre compte à rebours
-            console.log("presentation termines");
-
-        }, diff);
-    }
-
-
 
 
 });
