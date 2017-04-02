@@ -2,23 +2,36 @@ $(document).ready(function() {
 
     // il faut que je check tous les x intervalle si je dois changer de presentation en fonction de la duree de chaque presentation
 
-    var original = {
-        'date': new Date()
-    };
+    var firstlaunch = true;
 
-    var serieToDisplay = getSerieToDisplay();
+    var serieDisplayed = getSerieToDisplay();
     //console.log(serieToDisplay);
 
     var updated = setInterval(function() {
-        serieToDisplay = getSerieToDisplay();
-        console.log(serieToDisplay);
+
         //je ne met a jour le html que si quelque chose a changer
+        serieToDisplay = getSerieToDisplay();
+        if(serieDisplayed.id != serieToDisplay.id) {
+            //console.log('on doit changer de serie');
+            serieDisplayed = serieToDisplay;
+        } else {
+            //console.log('meme serie');
+            if(firstlaunch) {
+                console.log('init display');
+                firstlaunch = false;
+                displaySerie(serieDisplayed);
+            }
+        }
+
         //je regarde le nombre d'affichages et leur dure
 
         //var nbPresentations = serieToDisplay.affichages.length;
         //console.log(nbPresentations);
 
         //pour chaque presentation je fais un set interval sur la duree de la presentation
+
+
+        //console.log(serieToDisplay);
         /*serieToDisplay.affichages.forEach(function(affichage) {
             console.log(affichage);
         });*/
@@ -53,7 +66,6 @@ $(document).ready(function() {
             dataType: 'json',
             async: false,
             success: function(response) {
-                console.log(response);
                 serieActive = response;
             },
             error: function (response) {
@@ -63,29 +75,20 @@ $(document).ready(function() {
         return serieActive;
     }
 
-    //console.log(serieToDisplay);
-    /*var dateSerie = new Date(serieToDisplay.affichages[1].presentation.presentation_duration);
-    var dateReference = new Date('1970-01-01T00:00:00+0100');
-
-    var diff = dateSerie - dateReference;
-
-    var diffSeconds = diff/1000;
-    var HH = Math.floor(diffSeconds/3600);
-    var MM = Math.floor(diffSeconds%3600)/60;
-
-    console.log(diffSeconds);
-    console.log(MM);
-    console.log(HH);
-
     //je veux afficher des presentations
-    var now = new Date();
-    var html = generateHtmlIframe(serieToDisplay.affichages[0]);
+    /*var html = generateHtmlIframe(serieToDisplay.affichages[0]);
     $('#iframeDiv').html(html);*/
 
 
 
+    /*
+    * Permet de generer le code html a inserer dans la page
+    * @param affichage : json object representant une presentation avec google id, longueur pres + param lecteur
+    * @return : html code of an iframe
+    * */
     function generateHtmlIframe(affichage)
     {
+        console.log(affichage);
         var iframeHtmlCode = '';
 
         if(
@@ -108,6 +111,101 @@ $(document).ready(function() {
 
     }
 
+
+    /*
+    * Permet de mettre a jour l'affichage d'une serie de preserntations si une nouvelle est retourne par le backend
+    * @param : la nouvelle serie retourne par le backend
+    * */
+    function displaySerie(serie)
+    {
+        //j'ai une nnouvelle serie je veux l'afficher
+        //je vais regarder chacun de ses affichages
+
+        console.log(serie);
+
+        var i = 0;
+        playNextPresentation();
+
+        function playNextPresentation()
+        {
+            var now = new Date();
+            console.log(now);
+            if (i < serie.affichages.length) {
+                var presentation = serie.affichages[i].presentation;
+
+                var dateSerie = new Date(presentation.presentation_duration);
+                var dateReference = new Date('1970-01-01T00:00:00+0100');
+                var diff = dateSerie - dateReference;
+
+                var intervalTimeOut = diff + 2;
+
+                var iframeHtmlCode = generateHtmlIframe(serie.affichages[i]);
+                $('#iframeDiv').html(iframeHtmlCode);
+
+                i++;
+                if( i == serie.affichages.length) {
+                    i = 0;
+                }
+                setTimeout(playNextPresentation, intervalTimeOut);
+            }
+        }
+
+
+
+        /*var affichage = serie.affichages[0];
+        console.log(affichage.id);
+        var dateSerie = new Date(affichage.presentation.presentation_duration);
+        var dateReference = new Date('1970-01-01T00:00:00+0100');
+        var diff = dateSerie - dateReference;
+
+        var diffSeconds = diff/1000;
+        console.log(diff);
+
+        var timerID = setInterval(function() { // On crée notre compte à rebours
+            displayAffichage(affichage);
+            console.log("presentation termines");
+
+        }, diff);*/
+
+
+
+        /*for(var i=0 ; i<serie.affichages.length ; i++) {
+
+            console.log('display new affichage');
+            displayAffichage(serie.affichages[i]);
+
+            var affichage = serie.affichages[i];
+            console.log(affichage.id);
+            var dateSerie = new Date(affichage.presentation.presentation_duration);
+            var dateReference = new Date('1970-01-01T00:00:00+0100');
+            var diff = dateSerie - dateReference;
+
+            var diffSeconds = diff/1000;
+            console.log(diff);
+
+            var timerID = setTimeout(function() { // On crée notre compte à rebours
+                console.log("presentation termines");
+
+            }, diff);
+        }*/
+
+    }
+
+    function displayAffichage(affichage)
+    {
+        console.log('display affichage');
+        var dateSerie = new Date(affichage.presentation.presentation_duration);
+        var dateReference = new Date('1970-01-01T00:00:00+0100');
+        var diff = dateSerie - dateReference;
+
+        var diffSeconds = diff/1000;
+        console.log(diff);
+
+        var timerID = setTimeout(function() { // On crée notre compte à rebours
+            console.log("presentation termines");
+
+        }, diff);
+    }
 
 
 
